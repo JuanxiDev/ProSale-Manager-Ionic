@@ -12,7 +12,7 @@ import { User } from '../../user';
 
 export class UsuarioService {
 
-  private urlUsers ="http://localhost:8080/inventario-app/usuarios";
+  private urlUsers ="https://prosale-back.azurewebsites.net/inventario-app/usuarios";
 
   constructor(private clienteHttp: HttpClient) { }
 
