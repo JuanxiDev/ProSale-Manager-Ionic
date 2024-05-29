@@ -1,4 +1,7 @@
 import { Component } from '@angular/core';
+import { LoginService } from './Services/auth/login.service';
+
+
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -6,13 +9,31 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   public appPages = [
-    { title: 'Inbox', url: '/folder/inbox', icon: 'mail' },
-    { title: 'Outbox', url: '/folder/outbox', icon: 'paper-plane' },
-    { title: 'Favorites', url: '/folder/favorites', icon: 'heart' },
-    { title: 'Archived', url: '/folder/archived', icon: 'archive' },
-    { title: 'Trash', url: '/folder/trash', icon: 'trash' },
-    { title: 'Spam', url: '/folder/spam', icon: 'warning' },
-  ];
-  public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-  constructor() {}
+    { title: 'Inicio', url: '/home', icon: 'home' },
+    { title: 'Productos', url: '/producto-lista', icon: 'basket' },
+    { title: 'Proveedores', url: '/proveedor-lista', icon: 'cart' },
+    { title: 'Usuarios', url: '/user-lista', icon: 'people' },
+  ]; 
+  userLoginOn: boolean = false;
+
+  constructor(private loginService: LoginService) { }
+
+
+  ngOnInit(): void {
+    this.loginService.userLogued.subscribe(
+      {
+        next: (userLoginOn) => {
+          this.userLoginOn = userLoginOn;
+        }
+      }
+    )
+  }
+
+
+  logout() {
+    this.loginService.userLogued.next(false)
+    console.log("llega")
+  }
+
+
 }

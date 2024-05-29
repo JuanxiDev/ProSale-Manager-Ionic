@@ -1,0 +1,180 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Proveedores</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="d-flex justify-content-center">
+
+    <div class="container text-center my-3" *ngIf="!userLoginOn">
+      <p>Debes iniciar sesión</p>
+    </div>
+    <div class="my-5 d-flex align-items-center table-responsive" *ngIf="userLoginOn">
+
+      <ion-card class="ion-padding ion-text-center">
+        <ion-card-header>
+          <ion-card-title>Bienvenido {{userData?.name}}</ion-card-title>
+          <ion-card-subtitle>Administra tus proveedores.</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="ion-padding">
+            <table class="table table-bordered border-secundary table-hover align-middle">
+              <thead class="table-dark text-center">
+                <tr>
+                  <th id="id">Id</th>
+                  <th id="name">NIT</th>
+                  <th id="descr">Nombre</th>
+                  <th id="precio">Dirección</th>
+                  <th id="proveedor">Teléfono</th>
+                  <th id="precioProv">Celular</th>
+                  <th *ngIf="userlog.rol === 'Administrador' " scope="col">Funciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let proveedor of proveedores">
+                  <td>{{proveedor.idProveedor}}</td>
+                  <td>{{proveedor.nit}}</td>
+                  <td>{{proveedor.nombreProveedor}}</td>
+                  <td>{{proveedor.direccion}}</td>
+                  <td>{{proveedor.telefono}}</td>
+                  <td>{{proveedor.celular}}</td>
+                  <td class="text-center" *ngIf="userlog.rol === 'Administrador'">
+                    <div>
+                      <button (click)="editarProveedor(proveedor.idProveedor); setEdit(true)" type="button"
+                        class="btn btn-warning btn-sm me-3">Editar</button>
+                      <button (click)="eliminarProveedor(proveedor.idProveedor)" type="button"
+                        class="btn btn-danger btn-sm me-3">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+
+          <!-- Boton nuevo proveedor -->
+          <button type="button" class="btn btn-primary my-2" data-bs-toggle="modal" data-bs-target="#modalAdd"
+            (click)="setAdd(true)" *ngIf="userlog.rol === 'Administrador' ">
+            Agregar proveedor
+          </button>
+        </ion-card-content>
+      </ion-card>
+
+      <!----- Modal Agregar Proveedor ----->
+      <ion-modal [isOpen]="modalAdd">
+        <ng-template>
+
+          <ion-header>
+            <ion-toolbar color="light">
+              <ion-title class="fs-5">Ingresa tu Proveedor</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="setAdd(false)">Cerrar</ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+
+          <ion-content>
+            <form (ngSubmit)="onSubmitProv()">
+              <ion-item>
+                <ion-label position="stacked">Nombre del Proveedor</ion-label>
+                <ion-input type="text" required [(ngModel)]="proveedor.nombreProveedor"
+                  name="nombreProveedor"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Nit del Proveedor</ion-label>
+                <ion-input type="number" required [(ngModel)]="proveedor.nit" name="nit"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Dirección del proveedor</ion-label>
+                <ion-input type="text" required [(ngModel)]="proveedor.direccion" name="direccion"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Teléfono del proveedor</ion-label>
+                <ion-input type="number" required [(ngModel)]="proveedor.telefono" name="telefono"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Celular del proveedor</ion-label>
+                <ion-input type="number" required [(ngModel)]="proveedor.celular" name="celular"></ion-input>
+              </ion-item>
+              <ion-footer>
+                <ion-toolbar color="light">
+                  <ion-row>
+                    <ion-col>
+                      <ion-button expand="block" color="danger" (click)="setAdd(false)">Cerrar</ion-button>
+                    </ion-col>
+                    <ion-col>
+                      <ion-button expand="block" color="primary" type="submit" (click)="setAdd(false)">Agregar proveedor</ion-button>
+                    </ion-col>
+                  </ion-row>
+                </ion-toolbar>
+              </ion-footer>
+            </form>
+          </ion-content>
+        </ng-template>
+
+      </ion-modal>
+      <!----- Modal ----->
+
+
+      <!----- Modal Editar Proveedor ----->
+      <ion-modal [isOpen]="modalEdit">
+        <ng-template>
+          <ion-header>
+            <ion-toolbar color="light">
+              <ion-title class="fs-5">Modifica tu proveedor</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="cancel()">
+                  <ion-icon name="close"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+
+          <ion-content>
+            <form (ngSubmit)="onSubmitEdit(proveedorEdit.idProveedor)">
+              <ion-item>
+                <ion-label position="stacked">Nombre del Proveedor</ion-label>
+                <ion-input type="text" name="nombreProveedor" required
+                  [(ngModel)]="proveedorEdit.nombreProveedor"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Nit del Proveedor</ion-label>
+                <ion-input type="number" name="nit" required [(ngModel)]="proveedorEdit.nit"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Dirección del proveedor</ion-label>
+                <ion-input type="text" name="direccion" required [(ngModel)]="proveedorEdit.direccion"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Teléfono del proveedor</ion-label>
+                <ion-input type="number" name="telefono" required [(ngModel)]="proveedorEdit.telefono"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Celular del proveedor</ion-label>
+                <ion-input type="number" name="celular" required [(ngModel)]="proveedorEdit.celular"></ion-input>
+              </ion-item>
+
+              <ion-footer style="background: rgb(231, 232, 238);">
+                <ion-toolbar>
+                  <ion-buttons slot="end">
+                    <ion-button type="button" color="danger" (click)="cancel()">Cerrar</ion-button>
+                    <ion-button type="submit" color="primary">Guardar proveedor</ion-button>
+                  </ion-buttons>
+                </ion-toolbar>
+              </ion-footer>
+            </form>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+      <!----- Modal ----->
+
+    </div>
+  </div>
+
+  <footer *ngIf="userLoginOn">
+    <app-footer></app-footer>
+  </footer>
+
+</ion-content>

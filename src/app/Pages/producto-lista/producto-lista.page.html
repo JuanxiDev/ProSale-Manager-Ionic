@@ -1,0 +1,196 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Lista de Productos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="d-flex justify-content-center">
+
+    <div class="container text-center my-3" *ngIf="!userLoginOn">
+      <p>Debes iniciar sesión</p>
+    </div>
+
+    <div class="my-5 d-flex align-items-center" *ngIf="userLoginOn">
+
+      <ion-card class="ion-padding ion-text-center" >
+        <ion-card-header>
+          <ion-card-title>Bienvenido {{userData?.name}}</ion-card-title>
+          <ion-card-subtitle>Administra tus productos.</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="ion-padding">
+            <table class="table table-bordered border-secundary table-hover align-middle table-responsive">
+              <thead class="table-dark text-center">
+                <tr>
+                  <th id="id">Id</th>
+                  <th id="name">Nombre</th>
+                  <th id="descr">Descripción</th>
+                  <th id="precio">Precio de venta</th>
+                  <th id="precioProv">Precio de compra</th>
+                  <th id="precioProv">Ganancia</th>
+                  <th id="proveedor">Proveedor</th>
+                  <th id="stock">Stock</th>
+                  <th id="buttons">Funciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let producto of productos">
+                  <td>{{producto.idProducto}}</td>
+                  <td>{{producto.nombreProducto}}</td>
+                  <td>{{producto.descripcion}}</td>
+                  <td>$ {{producto.precio}}</td>
+                  <td>$ {{producto.precioprov}}</td>
+                  <td>{{((producto.precio - producto.precioprov) / producto.precioprov * 100).toFixed(2)}} %</td>
+                  <td>{{producto.proveedor.nombreProveedor}}</td>
+                  <td>{{producto.stock}}</td>
+                  <td class="text-center">
+                    <div>
+                      <button (click)="editarProducto(producto.idProducto); setEdit(true)" type="button"
+                        class="btn btn-warning btn-sm me-3">Editar</button>
+                      <button (click)="eliminarProducto(producto.idProducto)" type="button"
+                        class="btn btn-danger btn-sm me-3">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+
+          <!-- Boton nuevo producto -->
+          <button type="button" class="btn btn-primary my-2" data-bs-toggle="modal" data-bs-target="#modalAdd"
+            (click)="setAdd(true)">
+            Agregar producto
+          </button>
+        </ion-card-content>
+      </ion-card>
+
+
+      <!----- Modal Agregar Producto ----->
+      <ion-modal [isOpen]="modalAdd">
+        <ng-template>
+          <ion-header>
+            <ion-toolbar style="background: rgb(231, 232, 238);">
+              <ion-title>Ingresa tu producto</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="setAdd(false)">Cerrar</ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+
+          <ion-content>
+            <form #formAdd (ngSubmit)="onSubmitAdd()">
+              <ion-list lines="full">
+                <ion-item>
+                  <ion-label position="stacked">Nombre del producto</ion-label>
+                  <ion-input type="text" required [(ngModel)]="producto.nombreProducto"
+                    name="nombreProducto"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Descripción del producto</ion-label>
+                  <ion-input type="text" required [(ngModel)]="producto.descripcion" name="descripcion"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Precio del producto</ion-label>
+                  <ion-input type="number" required [(ngModel)]="producto.precio" name="precio"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Proveedor del producto</ion-label>
+                  <ion-select [(ngModel)]="selectedProveedor" name="idProv">
+                    <ion-select-option *ngFor="let proveedor of proveedores" [value]="proveedor.nombreProveedor">
+                      {{proveedor.nombreProveedor}}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Precio del proveedor</ion-label>
+                  <ion-input type="number" required [(ngModel)]="producto.precioprov" name="precioprov"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Stock del producto</ion-label>
+                  <ion-input type="number" required [(ngModel)]="producto.stock" name="stock"></ion-input>
+                </ion-item>
+              </ion-list>
+
+              <ion-footer style="background: rgb(231, 232, 238);">
+                <ion-toolbar>
+                  <ion-buttons slot="end">
+                    <ion-button type="button" color="danger" (click)="setAdd(false)">Cerrar</ion-button>
+                    <ion-button type="submit" color="primary">Agregar producto</ion-button>
+                  </ion-buttons>
+                </ion-toolbar>
+              </ion-footer>
+            </form>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+      <!----- Modal ----->
+
+
+      <!----- Modal Editar Producto ----->
+      <ion-modal [isOpen]="modalEdit">
+        <ng-template>
+          <ion-header>
+            <ion-toolbar style="background: rgb(231, 232, 238);">
+              <ion-title>Ingresa tu producto</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="setEdit(false)">Cerrar</ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+
+          <ion-content>
+            <form (ngSubmit)="guardarProducto(productoEdit.idProducto)">
+              <ion-list lines="full">
+                <ion-item>
+                  <ion-label position="stacked">Nombre del producto</ion-label>
+                  <ion-input type="text" required [(ngModel)]="productoEdit.nombreProducto"
+                    name="nombreProducto"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Descripción del producto</ion-label>
+                  <ion-input type="text" required [(ngModel)]="productoEdit.descripcion" name="descripcion"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Precio del producto</ion-label>
+                  <ion-input type="number" required [(ngModel)]="productoEdit.precio" name="precio"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Proveedor del producto</ion-label>
+                  <ion-select [(ngModel)]="productoEdit?.proveedor.idProveedor" name="editProv">
+                    <ion-select-option *ngFor="let proveedor of proveedores" [value]="proveedor.idProveedor">
+                      {{proveedor.nombreProveedor}}
+                    </ion-select-option>
+                  </ion-select>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Precio del proveedor</ion-label>
+                  <ion-input type="number" required [(ngModel)]="productoEdit.precioprov" name="precioprov"></ion-input>
+                </ion-item>
+                <ion-item>
+                  <ion-label position="stacked">Stock del producto</ion-label>
+                  <ion-input type="number" required [(ngModel)]="productoEdit.stock" name="stock"></ion-input>
+                </ion-item>
+              </ion-list>
+
+              <ion-footer style="background: rgb(231, 232, 238);">
+                <ion-toolbar>
+                  <ion-buttons slot="end">
+                    <ion-button type="button" color="danger" (click)="cancel()">Cerrar</ion-button>
+                    <ion-button type="submit" color="primary" (click)="setAdd(false)">Guardar producto</ion-button>
+                  </ion-buttons>
+                </ion-toolbar>
+              </ion-footer>
+            </form>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+      <!----- Modal ----->
+
+    </div>
+  </div>
+  <footer *ngIf="userLoginOn">
+    <app-footer></app-footer>
+  </footer>
+</ion-content>

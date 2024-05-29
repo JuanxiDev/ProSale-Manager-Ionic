@@ -1,0 +1,205 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Usuarios</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="d-flex justify-content-center">
+
+    <div class="container text-center my-3" *ngIf="!userLoginOn">
+      <p>Debes iniciar sesión</p>
+    </div>
+
+    <div class="my-5 d-flex align-items-center content-wrap table-responsive" *ngIf="userLoginOn">
+
+      <ion-card class="ion-padding ion-text-center">
+        <ion-card-header>
+          <ion-card-title>Bienvenido {{userData?.name}}</ion-card-title>
+          <ion-card-subtitle>Control de usuarios.</ion-card-subtitle>
+        </ion-card-header>
+        <ion-card-content>
+          <div class="ion-padding">
+            <table class="table table-bordered border-secundary table-hover align-middle table-responsive">
+              <thead class="table-dark text-center">
+                <tr>
+                  <th scope="col">Id</th>
+                  <th scope="col">Username</th>
+                  <th scope="col">Nombre</th>
+                  <th scope="col">Apellido</th>
+                  <th scope="col">Teléfono</th>
+                  <th scope="col">Rol</th>
+                  <th scope="col">Estado</th>
+                  <th *ngIf="userlog.rol === 'Administrador' " scope="col">Funciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let usuario of usuarios">
+                  <th scope="row">{{usuario.idUser}}</th>
+                  <td>{{usuario.username}}</td>
+                  <td>{{usuario.name}}</td>
+                  <td>{{usuario.lastname}}</td>
+                  <td>{{usuario.telefono}}</td>
+                  <td>{{usuario.rol}}</td>
+                  <td>{{usuario.status}}</td>
+                  <td class="text-center" *ngIf="userlog.rol === 'Administrador' ">
+                    <div>
+                      <button (click)="editarUsuario(usuario.idUser); setEdit(true)" type="button"
+                        class="btn btn-warning btn-sm me-3">Editar</button>
+                      <button (click)="eliminarUsuario(usuario.idUser)" type="button"
+                        class="btn btn-danger btn-sm me-3">Eliminar</button>
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+
+
+          <!-- Boton nuevo usuario -->
+          <button type="button" class="btn btn-primary my-2" (click)="setAdd(true)"
+            *ngIf="userlog.rol === 'Administrador' ">
+            Agregar usuario
+          </button>
+        </ion-card-content>
+      </ion-card>
+
+
+      <!----- Modal Agregar usuario ----->
+      <ion-modal [isOpen]="modalAdd">
+        <ng-template>
+          <ion-header>
+            <ion-toolbar color="light">
+              <ion-title class="fs-5">Ingresa tu usuario</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="setAdd(false)">
+                  <ion-icon name="close"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+
+          <ion-content>
+            <form (ngSubmit)="onSubmitUss()">
+              <ion-item>
+                <ion-label position="stacked">Username</ion-label>
+                <ion-input type="text" name="username" required [(ngModel)]="usuario.username"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Nombre</ion-label>
+                <ion-input type="text" name="nombreUsuario" required [(ngModel)]="usuario.name"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Apellido</ion-label>
+                <ion-input type="text" name="apellido" required [(ngModel)]="usuario.lastname"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Teléfono</ion-label>
+                <ion-input type="number" name="telefono" required [(ngModel)]="usuario.telefono"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Contraseña</ion-label>
+                <ion-input type="password" name="contrasena" required [(ngModel)]="usuario.password"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Rol</ion-label>
+                <ion-select name="rol" required [(ngModel)]="usuario.rol">
+                  <ion-select-option value="Administrador">Administrador</ion-select-option>
+                  <ion-select-option value="Vendedor">Vendedor</ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Estado del usuario</ion-label>
+                <ion-select name="status" required [(ngModel)]="usuario.status">
+                  <ion-select-option value="Activo">Activo</ion-select-option>
+                  <ion-select-option value="Inactivo">Inactivo</ion-select-option>
+                </ion-select>
+              </ion-item>
+
+              <ion-row class="ion-margin-top">
+                <ion-col>
+                  <ion-button expand="block" color="danger" (click)="setAdd(false)">Cerrar</ion-button>
+                </ion-col>
+                <ion-col>
+                  <ion-button expand="block" color="primary" type="submit" (click)="setAdd(false)">Agregar
+                    usuario</ion-button>
+                </ion-col>
+              </ion-row>
+            </form>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+      <!----- Modal ----->
+
+
+      <!----- Modal Editar Producto ----->
+      <ion-modal [isOpen]="modalEdit">
+        <ng-template>
+          <ion-header>
+            <ion-toolbar color="light">
+              <ion-title class="fs-5">Modifica tu usuario</ion-title>
+              <ion-buttons slot="end">
+                <ion-button (click)="cancel()">
+                  <ion-icon name="close"></ion-icon>
+                </ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+
+          <ion-content>
+            <form (ngSubmit)="onSubmitEdit(userEdit.idUser)">
+              <ion-item>
+                <ion-label position="stacked">Username</ion-label>
+                <ion-input type="text" required [(ngModel)]="userEdit.username" name="username"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Nombre del usuario</ion-label>
+                <ion-input type="text" required [(ngModel)]="userEdit.name" name="name"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Apellido del usuario</ion-label>
+                <ion-input type="text" required [(ngModel)]="userEdit.lastname" name="apellido"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Teléfono del usuario</ion-label>
+                <ion-input type="number" required [(ngModel)]="userEdit.telefono" name="telefono"></ion-input>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Rol del usuario</ion-label>
+                <ion-select required [(ngModel)]="userEdit.rol" name="rol">
+                  <ion-select-option value="Administrador">Administrador</ion-select-option>
+                  <ion-select-option value="Vendedor">Vendedor</ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-item>
+                <ion-label position="stacked">Estado del usuario</ion-label>
+                <ion-select required [(ngModel)]="userEdit.status" name="status">
+                  <ion-select-option value="Activo">Activo</ion-select-option>
+                  <ion-select-option value="Inactivo">Inactivo</ion-select-option>
+                </ion-select>
+              </ion-item>
+              <ion-footer>
+                <ion-toolbar color="light">
+                  <ion-row>
+                    <ion-col>
+                      <ion-button expand="block" color="danger" (click)="cancel()">Cerrar</ion-button>
+                    </ion-col>
+                    <ion-col>
+                      <ion-button expand="block" color="primary" type="submit">Guardar usuario</ion-button>
+                    </ion-col>
+                  </ion-row>
+                </ion-toolbar>
+              </ion-footer>
+            </form>
+          </ion-content>
+        </ng-template>
+      </ion-modal>
+      <!----- Modal ----->
+
+    </div>
+  </div>
+  <footer *ngIf="userLoginOn">
+    <app-footer></app-footer>
+  </footer>
+</ion-content>
